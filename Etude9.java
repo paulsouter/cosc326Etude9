@@ -27,6 +27,8 @@ public class Etude9 {
         Scanner scanner = new Scanner(System.in);
         int width = 0;
         int length = 0;
+        ArrayList<uniqueCarpet> finishedCarpets = new ArrayList<uniqueCarpet>(); 
+       
         while (scanner.hasNext()) {
             try {
                 width = scanner.nextInt();
@@ -51,28 +53,57 @@ public class Etude9 {
                     }
                 }
                 if( tryPiece(carpet, piece)){
-                    result++;
+                	
+                
+                	System.out.println("Have " + finishedCarpets.size() + " carpets");
                     System.out.println("Found a complete carpet");
+                    for (int[] row : carpet) {
+                        for (int col : row) {
+                            System.out.print(col + " ");
+                        }
+                        System.out.println();
+                    }
+                    	
+                    
+                    uniqueCarpet current = new uniqueCarpet(carpet);
+                    Boolean found = false; 
+                    for(uniqueCarpet c : finishedCarpets){
+                    	 if(Arrays.deepEquals(carpet, c.carpet)){
+                    		System.out.println("but it was a duplicate... ");
+                    		found = true; 
+                    		break;
+                    	}
+                    }
+                //if(finishedCarpets.contains(current)){
+      
+                		
+                	
+                	if(!found){
+                		System.out.println("and it was unique!");
+                		finishedCarpets.add(current);
+          
+                		result++;
+                	}
+                	
+                    
                 }
                 else{
-                    System.out.println("false");
+                    System.out.println("Could not fill the grid");
                 }
-                for (int[] row : carpet) {
-                    for (int col : row) {
-                        System.out.print(col + " ");
-                    }
-                    System.out.println();
-                }
+                
+                
+                
                 System.out.println("\n");
                 piece++;
             }
+            
             for (int[] row : carpet) {
                 for (int col : row) {
                     System.out.print(col + " ");
                 }
                 System.out.println();
             }
-            System.out.println(result);
+            System.out.println("\nResult was " + result + " unique carpets");
         }
     }
 
@@ -322,5 +353,36 @@ public class Etude9 {
 
     public static void createStates() {
 
+    }
+    
+
+   public static class uniqueCarpet{
+	    public static int id; 
+    	private static int[][] carpet; 
+	   
+	   
+    	public uniqueCarpet(int[][] carpet){
+    		this.carpet = carpet;
+    		this.id = id++; 
+    	}
+    	
+    	public static int[][] getCarpet(){
+    		return carpet; 
+    	}
+    /*	//overide??
+    	public static Boolean equals(uniqueCarpet b){
+    	
+    		for (int[] row : carpet) {
+                for (int col : row) {
+                    System.out.print(col + " ");
+                    if(col != b.carpet[row][col]){
+                    	return false; 
+                    }
+                }
+                System.out.println();
+            }
+    		return true;
+    	}*/ 
+    
     }
 }
