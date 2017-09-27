@@ -47,7 +47,7 @@ public class Etude9 {
                 carpet = new int[width][length];
                 if( tryPiece(carpet, piece)){
                     result++;
-                    System.out.println("true");
+                    System.out.println("Found a complete carpet");
                 }
                 for (int[] row : carpet) {
                     for (int col : row) {
