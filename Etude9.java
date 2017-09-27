@@ -44,10 +44,18 @@ public class Etude9 {
             int result = 0;
             int[][] carpet = new int[width][length];
             while (piece < TOTAL_CARPET_STATES) {
-                carpet = new int[width][length];
+                System.out.println("piece " + piece);
+                for(int r =0; r < carpet.length; r++){
+                    for(int c =0; c < carpet[r].length; c++){
+                        carpet[r][c] =0;
+                    }
+                }
                 if( tryPiece(carpet, piece)){
                     result++;
                     System.out.println("Found a complete carpet");
+                }
+                else{
+                    System.out.println("false");
                 }
                 for (int[] row : carpet) {
                     for (int col : row) {
@@ -64,6 +72,7 @@ public class Etude9 {
                 }
                 System.out.println();
             }
+            System.out.println(result);
         }
     }
 
@@ -127,16 +136,27 @@ public class Etude9 {
                             pieceLoc[lastPieceAdded][1] = col;
                             lastPieceAdded++;
                         }
+//                        System.out.println("col : " + col + " row " +row + " i " + i + "\n");
+//                        for (int[] r : carpet) {
+//                            for (int c : r) {
+//                                System.out.print(c + " ");
+//                            }
+//                            System.out.println();
+//                        }
                         i++;
                     }
                 }
                 //if a peice wasn't added then it remove the last peice and sets row and col to that location
                 if (carpet[row][col] == 0) {
-                    row = pieceLoc[lastPieceAdded][0];
+                   // System.out.println("remove ");
+                    row = pieceLoc[lastPieceAdded-1][0];
                     col = pieceLoc[lastPieceAdded - 1][1];
                     i = carpet[row][col];
+                  //  System.out.println("i " + i);
+                  //  System.out.println("piece "+ ((carpet[pieceLoc[lastPieceAdded - 1][0]][pieceLoc[lastPieceAdded - 1][1]] - 1)+1) +" row " +  row + " col " +col );
                     remove(carpet, pieces.get(carpet[pieceLoc[lastPieceAdded - 1][0]][pieceLoc[lastPieceAdded - 1][1]] - 1), pieceLoc[lastPieceAdded - 1][0], pieceLoc[lastPieceAdded - 1][1]);
                     lastPieceAdded--;
+                   // return false;
                 } else {
                     i = 0;
                     col++;
@@ -182,7 +202,7 @@ public class Etude9 {
     public static void remove(int[][] carpet, int[][] piece, int x, int y) {
         int[] rows = {piece[0][1] + x, piece[1][1] + x, piece[2][1] + x, piece[3][1] + x};
         int[] cols = {piece[0][0] + y, piece[1][0] + y, piece[2][0] + y, piece[3][0] + y};
-
+     //   System.out.println("pi");
         int position = 0;
         while (position < 4) {
             if (rows[position] < carpet.length && rows[position] >= 0
@@ -190,16 +210,24 @@ public class Etude9 {
                     && cols[position] >= 0) {
                 position++;
             } else {
+               // System.out.println("remove failed");
                 break;
             }
         }
         if (position < 4) {
-            //  System.out.println("remove failed");
+          //   System.out.println("remove failed");
         } else {
             for (int i = 0; i < 4; i++) {
                 carpet[rows[i]][cols[i]] = 0;
+            //    System.out.println("row " + rows[i] + " col " + 
             }
-            //   System.out.println("removed shape");
+//                  for (int[] r : carpet) {
+//                            for (int c : r) {
+//                                System.out.print(c + " ");
+//                            }
+//                            System.out.println();
+//                        }
+//              System.out.println("removed shape");
         }
 
     }
