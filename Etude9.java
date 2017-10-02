@@ -29,8 +29,9 @@ public class Etude9 {
         Scanner scanner = new Scanner(System.in);
         int width = 0;
         int length = 0;
-        ArrayList<uniqueCarpet> finishedCarpets = new ArrayList<uniqueCarpet>();
         while (scanner.hasNext()) {
+
+            ArrayList<UniqueCarpet> finishedCarpets = new ArrayList<UniqueCarpet>();
             try {
                 width = scanner.nextInt();
                 length = scanner.nextInt();
@@ -56,45 +57,56 @@ public class Etude9 {
                     }
                 }
                 if (tryPiece(carpet, piece, pieceLoc, 0) != 0) {
-                    System.out.println("Have " + finishedCarpets.size() + " carpets");
                     System.out.println("Found a complete carpet");
-                    for (int[] row : carpet) {
+
+                    UniqueCarpet current = new UniqueCarpet();
+                    current.setCarpet(carpet);
+                    for (int[] row : current.getCarpet()) {
                         for (int col : row) {
                             System.out.print(col + " ");
                         }
                         System.out.println();
                     }
+                    
 
-                    uniqueCarpet current = new uniqueCarpet(carpet);
-                    Boolean found = false;
-                    for (uniqueCarpet c : finishedCarpets) {
-                        if (Arrays.deepEquals(carpet, c.carpet)) {
-                            System.out.println("but it was a duplicate... ");
-                            found = true;
-                            break;
-                        }
-                    }
-                    //if(finishedCarpets.contains(current)){
-
-                    if (!found) {
-                        System.out.println("and it was unique!");
+                    
+                    if(finishedCarpets.isEmpty()){
+                    	System.out.println("First carpet! Add to list");
                         finishedCarpets.add(current);
-
+                      //  System.out.println("Have " + finishedCarpets.size() + " carpets");
                         result++;
+                        continue; 
                     }
+                    
+                    if(isUnique(current, finishedCarpets)){ //returns true if we compare two identical finished carpets
+                    	System.out.println("and it was unique! Adding to finishedCarpets");
+                        finishedCarpets.add(current);
+                      //  System.out.println("Have " + finishedCarpets.size() + " carpets");
+                        result++;
+                    	
+                    }else{
+                    	System.out.println("but it was a duplicate... ");
+                    }
+                    
+                    
                 } else {
                     System.out.println("carpet filled = false");
                 }
                 System.out.println("\n");
                 piece++;
+                
             }
-            for (int[] row : carpet) {
+
+            System.out.println("\nResult was " + finishedCarpets.size() + " unique carpets");
+        /*    for (int[] row : carpet) {
                 for (int col : row) {
                     System.out.print(col + " ");
                 }
                 System.out.println();
-            }
-            System.out.println("\nResult was " + result + " unique carpets");
+            }*/
+            
+
+           
         }
     }
 
@@ -163,9 +175,9 @@ public class Etude9 {
                             pieceLoc[lastPieceAdded][0] = row;
                             pieceLoc[lastPieceAdded][1] = col;
                             lastPieceAdded++;
-                        } else if (startingPiece == 0 && lastPieceAdded == 0) {
+                        } /*else if (startingPiece == 0 && lastPieceAdded == 0) {
                             return 0;
-                        }
+                        }*/
                         System.out.println("col : " + col + " row " + row + " i " + i + "\n");
                         for (int[] r : carpet) {
                             for (int c : r) {
@@ -221,11 +233,11 @@ public class Etude9 {
         System.out.println("last piece added " + lastPieceAdded);
         System.out.println("starting Piece " + startingPiece);
         int piece = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
-        for (int x = startingPiece; x < lastPieceAdded; x++) {
+       /* for (int x = startingPiece; x < lastPieceAdded; x++) {
 //            System.out.println("peice x 0 :" +  pieceLoc[x][0]);
 //            System.out.println("peice x 1 :" +  pieceLoc[x][1]);
             remove(carpet, pieces.get(carpet[pieceLoc[x][0]][pieceLoc[x][1]] - 1), pieceLoc[x][0], pieceLoc[x][1]);
-        }
+        }*/
         for (int[] r : carpet) {
             for (int c : r) {
                 System.out.print(c + " ");
@@ -233,7 +245,7 @@ public class Etude9 {
             System.out.println();
         }
         System.out.println();
-        return 1 + tryPiece(carpet, piece, pieceLoc, startingPiece);
+        return 1; //+ tryPiece(carpet, piece, pieceLoc, startingPiece);
     }
 
     //addd that piece to the carpet with the number in the carpet the same as the number of the shape
@@ -416,34 +428,64 @@ public class Etude9 {
     public static void createStates() {
 
     }
+    
+    public static Boolean isUnique(UniqueCarpet a, ArrayList<UniqueCarpet> finishedCarpets){
+    	ArrayList<Boolean> uniqueCheck = new ArrayList<Boolean>();
+		
+    	for (UniqueCarpet b : finishedCarpets) {
+        	//System.out.println("Looking at carpet " + b.getID() + " of index " + finishedCarpets.indexOf(b));
+        	Boolean match = true;  //it is a duplicate until proven otherwise
+        	
+        	for(int i=0; i < a.carpet.length ; i++){
+    			for(int j=0; j< a.carpet[i].length; j++){
+    				System.out.println("Comparing " + a.carpet[i][j] + " with " + b.carpet[i][j]);
+    				if(a.carpet[i][j] != b.carpet[i][j]){
+    					match = false; //an element is not equal so this carpet is not a match 
+    				//	System.out.println("UNIQUE");
+    					//return false; 
+    				}
+    			}
+    		}
+        	
+        	uniqueCheck.add(match); //adds if these two carpets matched 
+        	System.out.println();
+        }
+    	if(uniqueCheck.contains(true)){ //if unique check contains at least one true, then there IS a duplicate
+    		System.out.println("DUPLICATE");
+    		return false; 
+    	}else{ //if the unique check does not contain a true, then this is unique as it does not match with any!
+    		System.out.println("UNIQUE");
+    		return true;
+    	}
+    }
 
-    public static class uniqueCarpet {
+    public static class UniqueCarpet {
 
-        public static int id;
-        private static int[][] carpet;
+        private int id = 1;
+        private int[][] carpet;
+        
+        public UniqueCarpet(){
+        	this.carpet = null;
+        	this.id = id++;
+        }
 
-        public uniqueCarpet(int[][] carpet) {
+        public UniqueCarpet(int[][] carpet) {
             this.carpet = carpet;
             this.id = id++;
         }
+        
+        public void setCarpet(int[][] carpet){
+        	this.carpet = carpet;
+        }
 
-        public static int[][] getCarpet() {
+        public int[][] getCarpet() {
             return carpet;
         }
-        /*	//overide??
-    	public static Boolean equals(uniqueCarpet b){
-    	
-    		for (int[] row : carpet) {
-                for (int col : row) {
-                    System.out.print(col + " ");
-                    if(col != b.carpet[row][col]){
-                    	return false; 
-                    }
-                }
-                System.out.println();
-            }
-    		return true;
-    	}*/
+        
+        public int getID(){
+        	return this.id;
+        }
+        	//overide??
 
     }
 }
