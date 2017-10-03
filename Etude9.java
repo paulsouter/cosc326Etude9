@@ -26,7 +26,6 @@ public class Etude9 {
      */
     public static void main(String[] args) {
 
-
         Scanner scanner = new Scanner(System.in);
         int width = 0;
         int length = 0;
@@ -43,20 +42,19 @@ public class Etude9 {
             createPieces();
             //   createStates();
 
-
             int piece = 0;
 
             int result = 0;
             int[][] carpet = new int[width][length];
-            int[][] pieceLoc  = new int[(width * length)/4][2];
+            int[][] pieceLoc = new int[(width * length) / 4][2];
             while (piece < TOTAL_CARPET_STATES) {
                 System.out.println("piece " + piece);
-                for(int r =0; r < carpet.length; r++){
-                    for(int c =0; c < carpet[r].length; c++){
-                        carpet[r][c] =0;
+                for (int r = 0; r < carpet.length; r++) {
+                    for (int c = 0; c < carpet[r].length; c++) {
+                        carpet[r][c] = 0;
                     }
                 }
-                if (tryPiece(carpet, piece, pieceLoc, 0) != 0) {
+                if (firstCarpet(carpet, piece, pieceLoc, 0) != 0) {
                     System.out.println("Found a complete carpet");
 
                     UniqueCarpet current = new UniqueCarpet();
@@ -67,63 +65,59 @@ public class Etude9 {
                         }
                         System.out.println();
                     }
-                    
 
-                    
-                    if(finishedCarpets.isEmpty()){
-                    	System.out.println("First carpet! Add to list");
+                    if (finishedCarpets.isEmpty()) {
+                        System.out.println("First carpet! Add to list");
                         finishedCarpets.add(current);
-                      //  System.out.println("Have " + finishedCarpets.size() + " carpets");
+                        //  System.out.println("Have " + finishedCarpets.size() + " carpets");
                         result++;
-                        continue; 
+                        continue;
                     }
-                    
-                    if(isUnique(current, finishedCarpets)){ //returns true if we compare two identical finished carpets
-                    	System.out.println("and it was unique! Adding to finishedCarpets");
+
+                    if (isUnique(current, finishedCarpets)) { //returns true if we compare two identical finished carpets
+                        System.out.println("and it was unique! Adding to finishedCarpets");
                         finishedCarpets.add(current);
-                      //  System.out.println("Have " + finishedCarpets.size() + " carpets");
+                        //  System.out.println("Have " + finishedCarpets.size() + " carpets");
                         result++;
-                    	
-                    }else{
-                    	System.out.println("but it was a duplicate... ");
+
+                    } else {
+                        System.out.println("but it was a duplicate... ");
                     }
-                    
-                    
+
                 } else {
                     System.out.println("carpet filled = false");
-                foundCarpet = false;
-                int tf =  tryPiece(carpet, piece, pieceLoc, 0);
-                if(tf !=0){
-                   result += tf;
-                    System.out.println("true");
-                }
-                else{
-                    System.out.println("false");
-                }
-                for (int[] row : carpet) {
-                    for (int col : row) {
-                        System.out.print(col + " ");
+                    foundCarpet = false;
+                    int tf = firstCarpet(carpet, piece, pieceLoc, 0);
+                    if (tf != 0) {
+                        result += tf;
+                        System.out.println("true");
+                    } else {
+                        System.out.println("false");
                     }
-                    System.out.println();
+                    for (int[] row : carpet) {
+                        for (int col : row) {
+                            System.out.print(col + " ");
+                        }
+                        System.out.println();
+                    }
+                    System.out.println("\n");
+                    piece++;
+
                 }
-                System.out.println("\n");
-                piece++;
-                
-            }
 
-
-            System.out.println("\nResult was " + finishedCarpets.size() + " unique carpets");
-        /*    for (int[] row : carpet) {
+                System.out.println("\nResult was " + finishedCarpets.size() + " unique carpets");
+                /*    for (int[] row : carpet) {
                 for (int col : row) {
                     System.out.print(col + " ");
                 }
                 System.out.println();
             }*/
 
+            }
         }
     }
-
     //Checks to see if current spot has free spots next to it
+
     public static boolean checkFreeSpots(int[][] carpet, int row, int col) {
         int i = 0;
         if (row + 1 < carpet.length) {
@@ -161,30 +155,23 @@ public class Etude9 {
         return true;
     }
 
-    //tries to fill a carpet 
-    public static int tryPiece(int[][] carpet, int number, int[][] pieceLoc, int startingPiece) {
-        if (startingPiece == 1)//break conditions
-        {
-            return 0;
-        }
+    public static int firstCarpet(int[][] carpet, int number, int[][] pieceLoc, int startingPiece) {
 
         int row = pieceLoc[startingPiece][0];
         int col = pieceLoc[startingPiece][1];
-
-        // int[][] pieceLoc = new int[(carpet.length * carpet[0].length)][2];
         int lastPieceAdded = startingPiece;
         int i = number;
-        System.out.println("number :"+ number + " i "+ i);
+        System.out.println("number :" + number + " i " + i);
         //loops though the array trying to put peices in starting at 0,0 and removes peices when it can't add any more
         while (row < carpet.length) {
             while (col < carpet[0].length) {
                 if (carpet[row][col] == 0) {
                     if (!checkFreeSpots(carpet, row, col)) {
-                        i = 1000;
+                        i = 100;
                     }
                     //goes through all the pieces to add
                     while (i < TOTAL_CARPET_STATES && carpet[row][col] == 0) {
-                        if(row == pieceLoc[startingPiece][0] && col == pieceLoc[startingPiece][1] && i == number -1){
+                        if (row == pieceLoc[startingPiece][0] && col == pieceLoc[startingPiece][1] && i == number - 1) {
                             i++;
                         }
                         System.out.println("col : " + col + " row " + row + " i " + i + "\n");
@@ -192,9 +179,9 @@ public class Etude9 {
                             pieceLoc[lastPieceAdded][0] = row;
                             pieceLoc[lastPieceAdded][1] = col;
                             lastPieceAdded++;
-                        } /*else if (startingPiece == 0 && lastPieceAdded == 0) {
+                        } else if (startingPiece == 0 && lastPieceAdded == 0) {
                             return 0;
-                        }*/
+                        }
                         System.out.println("col : " + col + " row " + row + " i " + i + "\n");
                         for (int[] r : carpet) {
                             for (int c : r) {
@@ -219,51 +206,126 @@ public class Etude9 {
                     System.out.println("piece " + ((carpet[pieceLoc[lastPieceAdded - 1][0]][pieceLoc[lastPieceAdded - 1][1]] - 1) + 1) + " row " + row + " col " + col);
                     remove(carpet, pieces.get(carpet[pieceLoc[lastPieceAdded - 1][0]][pieceLoc[lastPieceAdded - 1][1]] - 1), pieceLoc[lastPieceAdded - 1][0], pieceLoc[lastPieceAdded - 1][1]);
                     lastPieceAdded--;
-                    // return false;
-
-                } else if(carpet[row][col] == 0){
+                } else if (carpet[row][col] == 0) {
                     return 0;
+                } else {
+                    i = 0;
+                    col++;
                 }
-                else {
+
+            }
+            row++;
+            col = 0;
+        }
+
+        System.out.println("starting Piece before " + startingPiece);
+        int piece = 0;
+        startingPiece = lastPieceAdded - 2;
+        piece = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
+
+        System.out.println("peice = " + piece);
+        setUpCarpet(carpet, pieceLoc, startingPiece, lastPieceAdded);
+        return 1 + tryPiece(carpet, piece, pieceLoc, startingPiece);
+    }
+
+    //tries to fill a carpet 
+    public static int tryPiece(int[][] carpet, int number, int[][] pieceLoc, int startingPiece) {
+        if (startingPiece == 0)//break conditions
+        {
+            return 0;
+        }
+
+        int row = pieceLoc[startingPiece][0];
+        int col = pieceLoc[startingPiece][1];
+
+        int lastPieceAdded = startingPiece;
+        int i = number;
+        System.out.println("number :" + number + " i " + i);
+        //loops though the array trying to put peices in starting at 0,0 and removes peices when it can't add any more
+        while (row < carpet.length) {
+            while (col < carpet[0].length) {
+                if (carpet[row][col] == 0) {
+                    if (!checkFreeSpots(carpet, row, col)) {
+                        row = 1000;
+                        col = 1000;
+                        break;
+                    }
+                    //goes through all the pieces to add
+                    while (i < TOTAL_CARPET_STATES && carpet[row][col] == 0) {
+                        if (row == pieceLoc[startingPiece][0] && col == pieceLoc[startingPiece][1] && i == number - 1) {
+                            i++;
+                        }
+                        //   System.out.println("col : " + col + " row " + row + " i " + i + "\n");
+                        if (row == pieceLoc[startingPiece][0] && col == pieceLoc[startingPiece][1]) {
+                            number = i;
+                        }
+                        if (shape1(carpet, pieces.get(i), col, row, i + 1)) {
+                            if (row != pieceLoc[startingPiece][0] && col != pieceLoc[startingPiece][1]) {
+                                startingPiece++;
+                                number = i;
+                            }
+                            pieceLoc[lastPieceAdded][0] = row;
+                            pieceLoc[lastPieceAdded][1] = col;
+                            lastPieceAdded++;
+                        } else if (startingPiece == 0 && lastPieceAdded == 0) {
+                            return 0;
+                        }
+                        System.out.println("col : " + col + " row " + row + " i " + i + "\n");
+                        for (int[] r : carpet) {
+                            for (int c : r) {
+                                System.out.print(c + " ");
+                            }
+                            System.out.println();
+                        }
+                        i++;
+                    }
+                }
+                if (carpet[row][col] == 0) {
+                    col = 1000;
+                    row = 1000;
+                    break;
+                } else {
                     i = 0;
                     col++;
                 }
             }
             row++;
-            col =0;
+            col = 0;
         }
 
-        if (!foundCarpet) {
-            System.out.println("starting Piece before " + startingPiece);
-            if (startingPiece == 0) {
-                startingPiece = lastPieceAdded - 2;
-            } else {
-                startingPiece--;
-            }
-            if (startingPiece == 0) {
+        System.out.println("starting Piece before " + startingPiece);
+        if (lastPieceAdded == (carpet.length * carpet[0].length) / 4) {
+            if (startingPiece == 1 && number >= TOTAL_CARPET_STATES - 1) {
                 return 1;
+            } else {
+                startingPiece = lastPieceAdded - 2;
+                number = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
+                setUpCarpet(carpet, pieceLoc, startingPiece, lastPieceAdded);
+                return 1 + tryPiece(carpet, number, pieceLoc, startingPiece);
             }
-            foundCarpet = true;
+        }
+        if (number >= TOTAL_CARPET_STATES - 1) {
+            startingPiece--;
+            number = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
+        } else {
+            number++;
         }
 
-//        for (int[] r : pieceLoc) {
-//            for (int c : r) {
-//                System.out.print(c + " ");
-//            }
-//            System.out.println();
-        //  }
-        System.out.println("last piece added " + lastPieceAdded);
-        System.out.println("starting Piece " + startingPiece);
-        int piece = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
+        System.out.println("peice = " + number);
+        setUpCarpet(carpet, pieceLoc, startingPiece, lastPieceAdded);
+        if (i >= TOTAL_CARPET_STATES) {
+            return 0 + tryPiece(carpet, number, pieceLoc, startingPiece);
+        } else {
+            return 0 + tryPiece(carpet, number, pieceLoc, startingPiece);
+        }
+    }
 
-       /* for (int x = startingPiece; x < lastPieceAdded; x++) {
-=======
-        System.out.println("peice = " + piece);
-        for (int x = startingPiece; x < lastPieceAdded; x++) {
-//            System.out.println("peice x 0 :" +  pieceLoc[x][0]);
-//            System.out.println("peice x 1 :" +  pieceLoc[x][1]);
+    public static void setUpCarpet(int[][] carpet, int[][] pieceLoc, int start, int end) {
+        System.out.println("last piece added " + end);
+        System.out.println("starting Piece " + start);
+        for (int x = start; x < end; x++) {
             remove(carpet, pieces.get(carpet[pieceLoc[x][0]][pieceLoc[x][1]] - 1), pieceLoc[x][0], pieceLoc[x][1]);
-        }*/
+        }
         for (int[] r : carpet) {
             for (int c : r) {
                 System.out.print(c + " ");
@@ -271,7 +333,7 @@ public class Etude9 {
             System.out.println();
         }
         System.out.println();
-        return 1; //+ tryPiece(carpet, piece, pieceLoc, startingPiece);
+
     }
 
     //addd that piece to the carpet with the number in the carpet the same as the number of the shape
@@ -454,64 +516,64 @@ public class Etude9 {
     public static void createStates() {
 
     }
-    
-    public static Boolean isUnique(UniqueCarpet a, ArrayList<UniqueCarpet> finishedCarpets){
-    	ArrayList<Boolean> uniqueCheck = new ArrayList<Boolean>();
-		
-    	for (UniqueCarpet b : finishedCarpets) {
-        	//System.out.println("Looking at carpet " + b.getID() + " of index " + finishedCarpets.indexOf(b));
-        	Boolean match = true;  //it is a duplicate until proven otherwise
-        	
-        	for(int i=0; i < a.carpet.length ; i++){
-    			for(int j=0; j< a.carpet[i].length; j++){
-    				System.out.println("Comparing " + a.carpet[i][j] + " with " + b.carpet[i][j]);
-    				if(a.carpet[i][j] != b.carpet[i][j]){
-    					match = false; //an element is not equal so this carpet is not a match 
-    				//	System.out.println("UNIQUE");
-    					//return false; 
-    				}
-    			}
-    		}
-        	
-        	uniqueCheck.add(match); //adds if these two carpets matched 
-        	System.out.println();
+
+    public static Boolean isUnique(UniqueCarpet a, ArrayList<UniqueCarpet> finishedCarpets) {
+        ArrayList<Boolean> uniqueCheck = new ArrayList<Boolean>();
+
+        for (UniqueCarpet b : finishedCarpets) {
+            //System.out.println("Looking at carpet " + b.getID() + " of index " + finishedCarpets.indexOf(b));
+            Boolean match = true;  //it is a duplicate until proven otherwise
+
+            for (int i = 0; i < a.carpet.length; i++) {
+                for (int j = 0; j < a.carpet[i].length; j++) {
+                    System.out.println("Comparing " + a.carpet[i][j] + " with " + b.carpet[i][j]);
+                    if (a.carpet[i][j] != b.carpet[i][j]) {
+                        match = false; //an element is not equal so this carpet is not a match 
+                        //	System.out.println("UNIQUE");
+                        //return false; 
+                    }
+                }
+            }
+
+            uniqueCheck.add(match); //adds if these two carpets matched 
+            System.out.println();
         }
-    	if(uniqueCheck.contains(true)){ //if unique check contains at least one true, then there IS a duplicate
-    		System.out.println("DUPLICATE");
-    		return false; 
-    	}else{ //if the unique check does not contain a true, then this is unique as it does not match with any!
-    		System.out.println("UNIQUE");
-    		return true;
-    	}
+        if (uniqueCheck.contains(true)) { //if unique check contains at least one true, then there IS a duplicate
+            System.out.println("DUPLICATE");
+            return false;
+        } else { //if the unique check does not contain a true, then this is unique as it does not match with any!
+            System.out.println("UNIQUE");
+            return true;
+        }
     }
 
     public static class UniqueCarpet {
 
         private int id = 1;
         private int[][] carpet;
-        
-        public UniqueCarpet(){
-        	this.carpet = null;
-        	this.id = id++;
+
+        public UniqueCarpet() {
+            this.carpet = null;
+            this.id = id++;
         }
 
         public UniqueCarpet(int[][] carpet) {
             this.carpet = carpet;
             this.id = id++;
         }
-        
-        public void setCarpet(int[][] carpet){
-        	this.carpet = carpet;
+
+        public void setCarpet(int[][] carpet) {
+            this.carpet = carpet;
         }
 
         public int[][] getCarpet() {
             return carpet;
         }
-        
-        public int getID(){
-        	return this.id;
+
+        public int getID() {
+            return this.id;
         }
-        	//overide??
+        //overide??
 
     }
 }
