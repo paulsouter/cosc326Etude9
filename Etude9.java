@@ -1,410 +1,159 @@
 
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 import java.util.Scanner;
-import java.util.Arrays;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- *
- * @author paul
- */
 public class Etude9 {
 
-    public static final int TOTAL_CARPET_STATES = 51;
-    public static ArrayList<int[][]> pieces;
-    public static ArrayList<int[][][]> states;
-    public static int statenum = 0;
-    public static boolean foundCarpet = false;
+    private static final int TOTAL_PIECES = 19;
+    private static ArrayList<int[][]> pieces;
+    private static int width;
+    private static int length;
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        createPieces();
+        Scanner scan = new Scanner(System.in);
+         width = scan.nextInt();
+        length = scan.nextInt();
 
-        Scanner scanner = new Scanner(System.in);
-        int width = 0;
-        int length = 0;
-        while (scanner.hasNext()) {
-
-            ArrayList<UniqueCarpet> finishedCarpets = new ArrayList<UniqueCarpet>();
-            try {
-                width = scanner.nextInt();
-                length = scanner.nextInt();
-            } catch (InputMismatchException e) {
-                e.printStackTrace();
-                System.exit(0);
-            }
-            createPieces();
-            //   createStates();
-
-            int piece = 0;
-
-            int result = 0;
-            int[][] carpet = new int[width][length];
-            int[][] pieceLoc = new int[(width * length) / 4][2];
-            while (piece < TOTAL_CARPET_STATES) {
-                System.out.println("piece " + piece);
-                for (int r = 0; r < carpet.length; r++) {
-                    for (int c = 0; c < carpet[r].length; c++) {
-                        carpet[r][c] = 0;
-                    }
-                }
-                if (firstCarpet(carpet, piece, pieceLoc, 0) != 0) {
-                    System.out.println("Found a complete carpet");
-
-                    UniqueCarpet current = new UniqueCarpet();
-                    current.setCarpet(carpet);
-                    for (int[] row : current.getCarpet()) {
-                        for (int col : row) {
-                            System.out.print(col + " ");
-                        }
-                        System.out.println();
-                    }
-
-                    if (finishedCarpets.isEmpty()) {
-                        System.out.println("First carpet! Add to list");
-                        finishedCarpets.add(current);
-                        //  System.out.println("Have " + finishedCarpets.size() + " carpets");
-                        result++;
-                        continue;
-                    }
-
-                    if (isUnique(current, finishedCarpets)) { //returns true if we compare two identical finished carpets
-                        System.out.println("and it was unique! Adding to finishedCarpets");
-                        finishedCarpets.add(current);
-                        //  System.out.println("Have " + finishedCarpets.size() + " carpets");
-                        result++;
-
-                    } else {
-                        System.out.println("but it was a duplicate... ");
-                    }
-
-                } else {
-                    System.out.println("carpet filled = false");
-                    foundCarpet = false;
-                    int tf = firstCarpet(carpet, piece, pieceLoc, 0);
-                    if (tf != 0) {
-                        result += tf;
-                        System.out.println("true");
-                    } else {
-                        System.out.println("false");
-                    }
-                    for (int[] row : carpet) {
-                        for (int col : row) {
-                            System.out.print(col + " ");
-                        }
-                        System.out.println();
-                    }
-                    System.out.println("\n");
-                    piece++;
-
-                }
-
-                System.out.println("\nResult was " + finishedCarpets.size() + " unique carpets");
-                /*    for (int[] row : carpet) {
-                for (int col : row) {
-                    System.out.print(col + " ");
-                }
-                System.out.println();
-            }*/
-
-            }
+        if (width * length % 4 != 0) {
+            System.out.println("Unfillable");
+            System.out.println(0);
+            return;
         }
+
+
+        boolean[][] carpet = new boolean[width][length];
+
+        long startTime = System.currentTimeMillis();
+        long counter = addPieces(carpet, 0, 0);
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("Counter : " + counter);
+        float duration = (endTime - startTime);
+        duration = duration / 1000; //to seconds?
+        System.out.println("Time:" + duration + " seconds");
     }
-    //Checks to see if current spot has free spots next to it
 
-    public static boolean checkFreeSpots(int[][] carpet, int row, int col) {
-        int i = 0;
-        if (row + 1 < carpet.length) {
-            if (carpet[row + 1][col] != 0) {
-                i++;
+    private static boolean[][] add(boolean[][] carpet, int[][] p, int x, int y) {
+
+        //create a new array
+        boolean[][] newArray = new boolean[width][length];
+        for (int row = 0; row < width; row++) {
+            for (int col = 0; col < length; col++) {
+                newArray[row][col] = carpet[row][col];
             }
-        } else {
-            i++;
         }
-        if (row > 0) {
-            if (carpet[row - 1][col] != 0) {
-                i++;
+        //see if the piece can fit
+        int row;
+        int col;
+        for (int[] piece : p) {
+            row = x + piece[0];
+            col = y + piece[1];
+            if (carpet[row][col]) {
+                return null;
+            } else {
+                newArray[row][col] = true;
             }
-        } else {
-            i++;
         }
-        if (col + 1 < carpet[row].length) {
-            if (carpet[row][col + 1] != 0) {
-                i++;
+        return newArray;
+    }
+
+    private static long addPieces(boolean[][] carpet, int row, int col) {
+
+        if (col == length) {
+            if (row== width - 1) {
+                if (carpet[row][col- 1] == true) {
+                    //Base case
+                    //System.out.println("Valid" + String.valueOf(lastPiece));
+                    return 1;
+                }
+                //invalid
+                return 0;
             }
-        } else {
-            i++;
-        }
-        if (col > 0) {
-            if (carpet[row][col - 1] != 0) {
-                i++;
-            }
-        } else {
-            i++;
-        }
-        if (i == 4) {
-            return false;
+            row= row + 1;
+            col = 0;
         }
 
+        long result = 0;
+        if (!carpet[row][col]) {
+            for (int[][] p : pieces) {
+                if (checkFreeSpots(carpet, row, col)) {
+                    if (checkBounds(p, row, col)) {
+                        boolean[][] newCarpet = add(carpet, p, row, col);
+                        if (newCarpet != null) {
+                            result += addPieces(newCarpet, row, col + 1);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (carpet[row][col]) {
+                return addPieces(carpet, row, col + 1);
+            }
+        }
+        return result;
+    }
+
+    private static boolean checkBounds(int[][] p, int x, int y) {
+        for (int[] piece : p) {
+            int row = x + piece[0];
+            int col = y + piece[1];
+
+            if (row >= width || col >= length|| row < 0 || col < 0) {
+                return false;
+            }
+
+        }
         return true;
     }
 
-    public static int firstCarpet(int[][] carpet, int number, int[][] pieceLoc, int startingPiece) {
 
-        int row = pieceLoc[startingPiece][0];
-        int col = pieceLoc[startingPiece][1];
-        int lastPieceAdded = startingPiece;
-        int i = number;
-        System.out.println("number :" + number + " i " + i);
-        //loops though the array trying to put peices in starting at 0,0 and removes peices when it can't add any more
-        while (row < carpet.length) {
-            while (col < carpet[0].length) {
-                if (carpet[row][col] == 0) {
-                    if (!checkFreeSpots(carpet, row, col)) {
-                        i = 100;
-                    }
-                    //goes through all the pieces to add
-                    while (i < TOTAL_CARPET_STATES && carpet[row][col] == 0) {
-                        if (row == pieceLoc[startingPiece][0] && col == pieceLoc[startingPiece][1] && i == number - 1) {
-                            i++;
-                        }
-                        System.out.println("col : " + col + " row " + row + " i " + i + "\n");
-                        if (shape1(carpet, pieces.get(i), col, row, i + 1)) {
-                            pieceLoc[lastPieceAdded][0] = row;
-                            pieceLoc[lastPieceAdded][1] = col;
-                            lastPieceAdded++;
-                        } else if (startingPiece == 0 && lastPieceAdded == 0) {
-                            return 0;
-                        }
-                        System.out.println("col : " + col + " row " + row + " i " + i + "\n");
-                        for (int[] r : carpet) {
-                            for (int c : r) {
-                                System.out.print(c + " ");
-                            }
-                            System.out.println();
-                        }
-                        i++;
-                    }
-                }
-                //if a peice wasn't added then it remove the last peice and sets row and col to that location
-                if (carpet[row][col] == 0 && startingPiece <= lastPieceAdded) {
-                    System.out.println("remove ");
-                    System.out.println("last peice :" + lastPieceAdded);
-                    if (lastPieceAdded == 0) {
-                        return 0;
-                    }
-                    row = pieceLoc[lastPieceAdded - 1][0];
-                    col = pieceLoc[lastPieceAdded - 1][1];
-                    i = carpet[row][col];
-                    System.out.println("i " + i);
-                    System.out.println("piece " + ((carpet[pieceLoc[lastPieceAdded - 1][0]][pieceLoc[lastPieceAdded - 1][1]] - 1) + 1) + " row " + row + " col " + col);
-                    remove(carpet, pieces.get(carpet[pieceLoc[lastPieceAdded - 1][0]][pieceLoc[lastPieceAdded - 1][1]] - 1), pieceLoc[lastPieceAdded - 1][0], pieceLoc[lastPieceAdded - 1][1]);
-                    lastPieceAdded--;
-                } else if (carpet[row][col] == 0) {
-                    return 0;
-                } else {
-                    i = 0;
-                    col++;
-                }
-
+    //Checks to see if current spot has free spots next to it
+    public static boolean checkFreeSpots(boolean[][] carpet, int row, int col) {
+        int i = 0;
+        int a =0;
+        int b =0;
+        int c =0;
+        int d =0;
+        if (row + 1 < width) {
+            if (carpet[row + 1][col]) {
+                a++;
             }
-            row++;
-            col = 0;
-        }
-
-        System.out.println("starting Piece before " + startingPiece);
-        int piece = 0;
-        startingPiece = lastPieceAdded - 2;
-        piece = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
-
-        System.out.println("peice = " + piece);
-        setUpCarpet(carpet, pieceLoc, startingPiece, lastPieceAdded);
-        return 1 + tryPiece(carpet, piece, pieceLoc, startingPiece);
-    }
-
-    //tries to fill a carpet 
-    public static int tryPiece(int[][] carpet, int number, int[][] pieceLoc, int startingPiece) {
-        if (startingPiece == 0)//break conditions
-        {
-            return 0;
-        }
-
-        int row = pieceLoc[startingPiece][0];
-        int col = pieceLoc[startingPiece][1];
-
-        int lastPieceAdded = startingPiece;
-        int i = number;
-        System.out.println("number :" + number + " i " + i);
-        //loops though the array trying to put peices in starting at 0,0 and removes peices when it can't add any more
-        while (row < carpet.length) {
-            while (col < carpet[0].length) {
-                if (carpet[row][col] == 0) {
-                    if (!checkFreeSpots(carpet, row, col)) {
-                        row = 1000;
-                        col = 1000;
-                        break;
-                    }
-                    //goes through all the pieces to add
-                    while (i < TOTAL_CARPET_STATES && carpet[row][col] == 0) {
-                        if (row == pieceLoc[startingPiece][0] && col == pieceLoc[startingPiece][1] && i == number - 1) {
-                            i++;
-                        }
-                        //   System.out.println("col : " + col + " row " + row + " i " + i + "\n");
-                        if (row == pieceLoc[startingPiece][0] && col == pieceLoc[startingPiece][1]) {
-                            number = i;
-                        }
-                        if (shape1(carpet, pieces.get(i), col, row, i + 1)) {
-                            if (row != pieceLoc[startingPiece][0] && col != pieceLoc[startingPiece][1]) {
-                                startingPiece++;
-                                number = i;
-                            }
-                            pieceLoc[lastPieceAdded][0] = row;
-                            pieceLoc[lastPieceAdded][1] = col;
-                            lastPieceAdded++;
-                        } else if (startingPiece == 0 && lastPieceAdded == 0) {
-                            return 0;
-                        }
-                        System.out.println("col : " + col + " row " + row + " i " + i + "\n");
-                        for (int[] r : carpet) {
-                            for (int c : r) {
-                                System.out.print(c + " ");
-                            }
-                            System.out.println();
-                        }
-                        i++;
-                    }
-                }
-                if (carpet[row][col] == 0) {
-                    col = 1000;
-                    row = 1000;
-                    break;
-                } else {
-                    i = 0;
-                    col++;
-                }
-            }
-            row++;
-            col = 0;
-        }
-
-        System.out.println("starting Piece before " + startingPiece);
-        if (lastPieceAdded == (carpet.length * carpet[0].length) / 4) {
-            if (startingPiece == 1 && number >= TOTAL_CARPET_STATES - 1) {
-                return 1;
-            } else {
-                startingPiece = lastPieceAdded - 2;
-                number = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
-                setUpCarpet(carpet, pieceLoc, startingPiece, lastPieceAdded);
-                return 1 + tryPiece(carpet, number, pieceLoc, startingPiece);
-            }
-        }
-        if (number >= TOTAL_CARPET_STATES - 1) {
-            startingPiece--;
-            number = carpet[pieceLoc[startingPiece][0]][pieceLoc[startingPiece][1]];
         } else {
-            number++;
+            a++;
         }
-
-        System.out.println("peice = " + number);
-        setUpCarpet(carpet, pieceLoc, startingPiece, lastPieceAdded);
-        if (i >= TOTAL_CARPET_STATES) {
-            return 0 + tryPiece(carpet, number, pieceLoc, startingPiece);
+        if (row > 0) {
+            if (carpet[row - 1][col]) {
+                b++;
+            }
         } else {
-            return 0 + tryPiece(carpet, number, pieceLoc, startingPiece);
+            b++;
         }
-    }
-
-    public static void setUpCarpet(int[][] carpet, int[][] pieceLoc, int start, int end) {
-        System.out.println("last piece added " + end);
-        System.out.println("starting Piece " + start);
-        for (int x = start; x < end; x++) {
-            remove(carpet, pieces.get(carpet[pieceLoc[x][0]][pieceLoc[x][1]] - 1), pieceLoc[x][0], pieceLoc[x][1]);
-        }
-        for (int[] r : carpet) {
-            for (int c : r) {
-                System.out.print(c + " ");
+        if (col + 1 < length) {
+            if (carpet[row][col + 1]) {
+                c++;
             }
-            System.out.println();
+        } else {
+            c++;
         }
-        System.out.println();
-
-    }
-
-    //addd that piece to the carpet with the number in the carpet the same as the number of the shape
-    //x and y are the position where the piece is to go
-    public static boolean shape1(int[][] carpet, int[][] piece, int x, int y, int shape) {
-
-        int[] cols = {piece[0][0] + x, piece[1][0] + x, piece[2][0] + x, piece[3][0] + x};
-        int[] rows = {piece[0][1] + y, piece[1][1] + y, piece[2][1] + y, piece[3][1] + y};
-
-//        for(int i =0; i < 4; i++){
-//               System.out.println("row " + rows[i] + " col " + cols[i]);
-//        }
-        //checks if the location is in the bounds and if something is in there.
-        int position = 0;
-        while (position < 4) {
-            if (rows[position] < carpet.length && rows[position] >= 0
-                    && cols[position] < carpet[rows[position]].length
-                    && cols[position] >= 0
-                    && carpet[rows[position]][cols[position]] == 0) {
-                position++;
-            } else {
-                break;
+        if (col > 0) {
+            if (carpet[row][col - 1]) {
+                d++;
             }
+        } else {
+            d++;
         }
-        if (position < 4) {
-            //    System.out.println("Insertion failed");
+        i = a+ b+ c+d;
+        if (i == 4) {
             return false;
-        } else {
-            for (int i = 0; i < 4; i++) {
-                carpet[rows[i]][cols[i]] = shape;
-
-            }
-            //  System.out.println("Inserted");
-            return true;
         }
+        return true;
     }
 
-    //removes that shape from the carpet
-    public static void remove(int[][] carpet, int[][] piece, int x, int y) {
-        int[] rows = {piece[0][1] + x, piece[1][1] + x, piece[2][1] + x, piece[3][1] + x};
-        int[] cols = {piece[0][0] + y, piece[1][0] + y, piece[2][0] + y, piece[3][0] + y};
-        //    System.out.println("pi");
-        int position = 0;
-        while (position < 4) {
-            if (rows[position] < carpet.length && rows[position] >= 0
-                    && cols[position] < carpet[rows[position]].length
-                    && cols[position] >= 0) {
-                position++;
-            } else {
-                // System.out.println("remove failed");
-                break;
-            }
-        }
-        if (position < 4) {
-            //     System.out.println("remove failed");
-        } else {
-            for (int i = 0; i < 4; i++) {
-                carpet[rows[i]][cols[i]] = 0;
-                //      System.out.println("row " + rows[i] + " col " + cols[i]);
-            }
-//                  for (int[] r : carpet) {
-//                            for (int c : r) {
-//                                System.out.print(c + " ");
-//                            }
-//                            System.out.println();
-//                        }
-            //     System.out.println("removed shape");
-        }
-
-    }
-
+  
     public static int[][] translate(int[][] piece, int[] distance) {
         for (int i = 0; i < 4; i++) {
             piece[i][0] += distance[0];
@@ -415,165 +164,47 @@ public class Etude9 {
 
     //copies a 2d arrray
     public static int[][] copy(int[][] old) {
-        int[][] myInt = new int[old.length][];
+        int[][] array = new int[old.length][];
         for (int i = 0; i < old.length; i++) {
-            myInt[i] = old[i].clone();
+            array[i] = old[i].clone();
         }
-        return myInt;
+        return array;
     }
 
-    public static void createPieces() {
+   private static void createPieces() {
         pieces = new ArrayList<int[][]>();
-        //(x,y)
 
-        //negative steps
-        pieces.add(new int[][]{{0, 0}, {0, 1}, {1, 1}, {1, 2}});//1
-        pieces.add(new int[][]{{0, 0}, {-1, 0}, {-1, 1}, {-2, 1}});//2
+        // reverse steps
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, -1}, {2, -1}});//1
+        pieces.add(new int[][]{{0, 0}, {0, 1}, {1, 1}, {1, 2}});//2
 
         // steps
-        pieces.add(new int[][]{{0, 0}, {0, 1}, {-1, 1}, {-1, 2}});//3
-        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, 1}, {2, 1}});//4
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, 1}, {2, 1}});//3
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, -1}, {0, 1}});//4
 
-        //T
-        pieces.add(new int[][]{{0, 0}, {0, 1}, {0, 2}, {1, 1}});//5
-        pieces.add(new int[][]{{0, 0}, {-1, 0}, {-2, 0}, {-1, 1}});//6
-        pieces.add(new int[][]{{0, 0}, {0, -1}, {0, -2}, {-1, -1}});//7
-        pieces.add(new int[][]{{0, 0}, {1, 0}, {2, 0}, {1, -1}});//8
-
-        //negative L
-        pieces.add(new int[][]{{0, 0}, {1, 0}, {2, 0}, {2, 1}});//9
-        pieces.add(new int[][]{{0, 0}, {0, 1}, {0, 2}, {1, 2}});//10
-        pieces.add(new int[][]{{0, 0}, {-1, 0}, {-2, 0}, {-2, -1}});//11
-        pieces.add(new int[][]{{0, 0}, {0, -1}, {0, -2}, {1, -2}});//12
+        // T
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, -1}, {2, 0}});//5
+        pieces.add(new int[][]{{0, 0}, {0, 1}, {1, 1}, {0, 2}});//6
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, 1}, {2, 0}});//7
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, -1}, {1, 1}});//8
 
         // L
-        pieces.add(new int[][]{{0, 0}, {1, 0}, {2, 0}, {2, -1}});//13
-        pieces.add(new int[][]{{0, 0}, {0, 1}, {0, 2}, {-1, 2}});//14
-        pieces.add(new int[][]{{0, 0}, {-1, 0}, {-2, 0}, {-2, 1}});//15
-        pieces.add(new int[][]{{0, 0}, {0, -1}, {0, -2}, {-1, -2}});//16
+        pieces.add(new int[][]{{0, 0}, {0, 1}, {0, 2}, {1, 2}});//9 L
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {2, 0}, {2, -1}});//10
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, 1}, {1, 2}});//11
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {2, 0}, {0, 1}});//12
 
-        //square
-        pieces.add(new int[][]{{0, 0}, {0, 1}, {1, 0}, {1, 1}});//17
+        // Reverse L
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {0, 1}, {0, 2}});//13
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {2, 0}, {2, 1}});//14
+        pieces.add(new int[][]{{0, 0}, {1, 0}, {1, -1}, {1, -2}});//15
+        pieces.add(new int[][]{{0, 0}, {0, 1}, {1, 1}, {2, 1}});//16
 
-        //line
+        // Line
         pieces.add(new int[][]{{0, 0}, {0, 1}, {0, 2}, {0, 3}});//18
         pieces.add(new int[][]{{0, 0}, {1, 0}, {2, 0}, {3, 0}});//19
 
-        //negative steps translate
-        pieces.add(translate(copy(pieces.get(0)), new int[]{-1, -2}));//20
-        pieces.add(translate(copy(pieces.get(1)), new int[]{2, -1}));//21
-
-        //steps translate corner
-        pieces.add(translate(copy(pieces.get(2)), new int[]{1, -2}));//22
-        pieces.add(translate(copy(pieces.get(3)), new int[]{-2, -1}));//23
-
-        //negative steps translate corner
-        pieces.add(translate(copy(pieces.get(0)), new int[]{-1, -1}));//20
-        pieces.add(translate(copy(pieces.get(1)), new int[]{1, -1}));//21
-
-        //steps translate
-        pieces.add(translate(copy(pieces.get(2)), new int[]{1, -1}));//22
-        pieces.add(translate(copy(pieces.get(3)), new int[]{-1, -1}));//23
-
-        //T translate
-        pieces.add(translate(copy(pieces.get(4)), new int[]{0, -2}));//24
-        pieces.add(translate(copy(pieces.get(4)), new int[]{-1, -1}));//25
-
-        pieces.add(translate(copy(pieces.get(5)), new int[]{2, 0}));//26
-        pieces.add(translate(copy(pieces.get(5)), new int[]{1, -1}));//27
-
-        pieces.add(translate(copy(pieces.get(6)), new int[]{0, 2}));//28
-        pieces.add(translate(copy(pieces.get(6)), new int[]{1, 1}));//29
-
-        pieces.add(translate(copy(pieces.get(7)), new int[]{-2, 0}));//30
-        pieces.add(translate(copy(pieces.get(7)), new int[]{-1, 1}));//31
-
-        //negative L translate
-        pieces.add(translate(copy(pieces.get(8)), new int[]{-2, -1}));//32
-        pieces.add(translate(copy(pieces.get(9)), new int[]{-1, -2}));//33
-        pieces.add(translate(copy(pieces.get(10)), new int[]{2, 1}));//34
-        pieces.add(translate(copy(pieces.get(11)), new int[]{-1, 2}));//35
-
-        //negative L corner
-        pieces.add(translate(copy(pieces.get(8)), new int[]{-2, 0}));//32
-        pieces.add(translate(copy(pieces.get(9)), new int[]{0, -2}));//33
-        pieces.add(translate(copy(pieces.get(10)), new int[]{2, 0}));//34
-        pieces.add(translate(copy(pieces.get(11)), new int[]{0, 2}));//35
-
-        //L translate
-        pieces.add(translate(copy(pieces.get(12)), new int[]{-2, 1}));//36
-        pieces.add(translate(copy(pieces.get(13)), new int[]{-1, -2}));//37
-        pieces.add(translate(copy(pieces.get(14)), new int[]{2, -1}));//38
-        pieces.add(translate(copy(pieces.get(15)), new int[]{1, 2}));//39
-
-        //L corner
-        pieces.add(translate(copy(pieces.get(12)), new int[]{-2, 0}));//36
-        pieces.add(translate(copy(pieces.get(13)), new int[]{0, -2}));//37
-        pieces.add(translate(copy(pieces.get(14)), new int[]{2, 0}));//38
-        pieces.add(translate(copy(pieces.get(15)), new int[]{0, 2}));//39
-    }
-
-    public static void createStates() {
-
-    }
-
-    public static Boolean isUnique(UniqueCarpet a, ArrayList<UniqueCarpet> finishedCarpets) {
-        ArrayList<Boolean> uniqueCheck = new ArrayList<Boolean>();
-
-        for (UniqueCarpet b : finishedCarpets) {
-            //System.out.println("Looking at carpet " + b.getID() + " of index " + finishedCarpets.indexOf(b));
-            Boolean match = true;  //it is a duplicate until proven otherwise
-
-            for (int i = 0; i < a.carpet.length; i++) {
-                for (int j = 0; j < a.carpet[i].length; j++) {
-                    System.out.println("Comparing " + a.carpet[i][j] + " with " + b.carpet[i][j]);
-                    if (a.carpet[i][j] != b.carpet[i][j]) {
-                        match = false; //an element is not equal so this carpet is not a match 
-                        //	System.out.println("UNIQUE");
-                        //return false; 
-                    }
-                }
-            }
-
-            uniqueCheck.add(match); //adds if these two carpets matched 
-            System.out.println();
-        }
-        if (uniqueCheck.contains(true)) { //if unique check contains at least one true, then there IS a duplicate
-            System.out.println("DUPLICATE");
-            return false;
-        } else { //if the unique check does not contain a true, then this is unique as it does not match with any!
-            System.out.println("UNIQUE");
-            return true;
-        }
-    }
-
-    public static class UniqueCarpet {
-
-        private int id = 1;
-        private int[][] carpet;
-
-        public UniqueCarpet() {
-            this.carpet = null;
-            this.id = id++;
-        }
-
-        public UniqueCarpet(int[][] carpet) {
-            this.carpet = carpet;
-            this.id = id++;
-        }
-
-        public void setCarpet(int[][] carpet) {
-            this.carpet = carpet;
-        }
-
-        public int[][] getCarpet() {
-            return carpet;
-        }
-
-        public int getID() {
-            return this.id;
-        }
-        //overide??
-
+        // Square
+        pieces.add(new int[][]{{0, 0}, {0, 1}, {1, 0}, {1, 1}});//17
     }
 }
